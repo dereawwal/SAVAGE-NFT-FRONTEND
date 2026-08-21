@@ -190,3 +190,61 @@ nav .nav-placeholder {
   .editorial-nav .brand, .collection-page-header .brand { font-size: 15px; }
   .collection-back { padding: 9px 8px; font-size: 5.5px; }
 }
+
+/* Mission cards must use document flow on touch screens. */
+@media (max-width: 600px) {
+  .mission-panel {
+    margin-top: 32px;
+    margin-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+
+  .mission-grid .mission,
+  .mission-grid .mission:last-child {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    min-height: 330px;
+    padding: 22px;
+  }
+
+  .mission-grid .mission h2 {
+    margin: 82px 0 14px;
+    line-height: 1.08;
+  }
+
+  .mission-grid .mission p {
+    position: static;
+    margin: 0 0 24px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  .mission-grid .mission button {
+    position: static;
+    inset: auto;
+    display: block;
+    flex: 0 0 auto;
+    width: 100%;
+    margin-top: auto;
+    padding: 15px 12px;
+  }
+
+  .mission-footer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (max-width: 380px) {
+  .mission-grid .mission,
+  .mission-grid .mission:last-child {
+    min-height: 315px;
+    padding: 18px;
+  }
+
+  .mission-grid .mission h2 {
+    margin-top: 76px;
+    font-size: 20px;
+  }
+}
