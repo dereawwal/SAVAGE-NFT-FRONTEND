@@ -43,12 +43,12 @@ export default function CollectionPage() {
             <span className="collection-meta"><small>THE SAVAGE NFT</small><strong>SAVAGE / {savage.id}</strong><b>VIEW</b></span>
           </button>)}
         </div>
-        <div className="collection-track" aria-hidden="true"><span>GENESIS SEVEN</span><i/><span>MORE SAVAGES EMERGING</span></div>
+        <div className="collection-track" aria-hidden="true"><span>THE SAVAGES</span><i/><span>MORE SAVAGES EMERGING</span></div>
       </section>
       {selectedSavage!==null&&<div className="collection-modal" role="dialog" aria-modal="true" aria-label={`Savage ${collection[selectedSavage].id} preview`} onClick={()=>setSelectedSavage(null)}>
         <button className="modal-close" onClick={()=>setSelectedSavage(null)} aria-label="Close collection preview">×</button>
         <button className="modal-nav modal-prev" onClick={event=>{event.stopPropagation();setSelectedSavage((selectedSavage+collection.length-1)%collection.length)}} aria-label="Previous Savage">←</button>
-        <figure onClick={event=>event.stopPropagation()}><img src={collection[selectedSavage].src} alt={`The Savage NFT ${collection[selectedSavage].id}`}/><figcaption><span>GENESIS COLLECTION</span><strong>SAVAGE / {collection[selectedSavage].id}</strong></figcaption></figure>
+        <figure onClick={event=>event.stopPropagation()}><img src={collection[selectedSavage].src} alt={`The Savage NFT ${collection[selectedSavage].id}`}/><figcaption><span>THE COLLECTION</span><strong>SAVAGE / {collection[selectedSavage].id}</strong></figcaption></figure>
         <button className="modal-nav modal-next" onClick={event=>{event.stopPropagation();setSelectedSavage((selectedSavage+1)%collection.length)}} aria-label="Next Savage">→</button>
       </div>}
     </main>

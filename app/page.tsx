@@ -1,23 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Stage =
   | "landing"
   | "identity"
   | "wallet"
   | "missions"
-  | "complete"
-  | "dashboard";
+  | "complete";
 type Savage = {
   username: string;
   wallet: string;
   savageId: string;
-  position: number;
-  xp: number;
-  rank: string;
-  recruits: number;
-  referralCode: string;
 };
 const nav = ["About", "Collection"];
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
@@ -98,10 +92,6 @@ export default function Home() {
           : 0;
   const walletValid = /^0x[a-fA-F0-9]{40}$/.test(wallet);
   const allDone = done.every(Boolean);
-  const masked = useMemo(
-    () => (wallet ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : "—"),
-    [wallet],
-  );
   const openMission = (index: number, href: string) => {
     window.open(href, "_blank", "noopener,noreferrer");
     setDone((current) =>
@@ -112,11 +102,10 @@ export default function Home() {
     setLoading(true);
     setError("");
     try {
-      const referral = new URLSearchParams(window.location.search).get("ref");
       const response = await fetch(`${API_BASE}/api/whitelist`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ username, wallet, missions: done, referral }),
+        body: JSON.stringify({ username, wallet, missions: done }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Registration failed");
@@ -317,30 +306,10 @@ export default function Home() {
               <strong>{profile?.savageId || "SAVAGE / PENDING"}</strong>
               <small>DO NOT FOLLOW. LEAD.</small>
             </div>
-            <button
-              className="primary-cta"
-              onClick={() => setStage("dashboard")}
-            >
-              ENTER SAVAGE
+            <button className="primary-cta" onClick={reset}>
+              BACK TO HOME
             </button>
           </section>
-        )}
-        {stage === "dashboard" && (
-          <Dashboard
-            profile={
-              profile || {
-                username,
-                wallet,
-                savageId: "SAVAGE / —",
-                position: 0,
-                xp: 250,
-                rank: "REBEL",
-                recruits: 0,
-                referralCode: "PENDING",
-              }
-            }
-            masked={masked}
-          />
         )}
         {step > 0 && (
           <aside className="access-meter">
@@ -407,9 +376,6 @@ export default function Home() {
       </div>
       <section className="hero">
         <div className="hero-copy">
-          <div className="eyebrow">
-            <span>001</span> Genesis whitelist
-          </div>
           <h1>
             NOT EVERYONE
             <br />
@@ -513,7 +479,7 @@ export default function Home() {
 
       <section className="home-portals">
         <a href="/about?edition=editorial"><small>DISCOVER THE MINDSET</small><strong>ABOUT THE SAVAGES</strong></a>
-        <a href="/collection"><small>MEET THE GENESIS SEVEN</small><strong>EXPLORE THE COLLECTION</strong></a>
+        <a href="/collection"><small>MEET THE SAVAGES</small><strong>EXPLORE THE COLLECTION</strong></a>
         <a href="https://x.com/thesavagesnft" target="_blank" rel="noreferrer"><small>FOLLOW THE TRANSMISSION</small><strong>JOIN THE PACK ON X</strong></a>
       </section>
 
@@ -522,86 +488,5 @@ export default function Home() {
         <div className="finale-copy"><span>THE GATES WON’T STAY OPEN FOREVER.</span><h2>READY TO JOIN<br/><em>THE WILD SIDE?</em></h2><p>One identity. One wallet. Your place in The Savage NFT begins here.</p><div><button className="primary-cta" onClick={()=>setStage("identity")}>JOIN THE SAVAGE</button><a href="/collection">VIEW COLLECTION →</a></div></div>
       </section>
     </main>
-  );
-}
-
-function Dashboard({ profile, masked }: { profile: Savage; masked: string }) {
-  const referral =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/?ref=${profile.referralCode}`
-      : "";
-  return (
-    <section className="dashboard">
-      <div className="dash-head">
-        <div>
-          <div className="eyebrow">
-            <span>●</span> Savage status active
-          </div>
-          <h1>
-            WELCOME, <em>@{profile.username}</em>
-          </h1>
-        </div>
-        <div className="rank-stamp">
-          <span>CURRENT RANK</span>
-          <strong>{profile.rank}</strong>
-        </div>
-      </div>
-      <div className="dash-grid">
-        <article className="status-card">
-          <span>SAVAGE ID</span>
-          <strong>{profile.savageId}</strong>
-          <ul>
-            <li>
-              <i>✓</i>X identity confirmed
-            </li>
-            <li>
-              <i>✓</i>Wallet{" "}
-              {profile.wallet
-                ? `${profile.wallet.slice(0, 6)}...${profile.wallet.slice(-4)}`
-                : masked}
-            </li>
-            <li>
-              <i>✓</i>Missions completed
-            </li>
-          </ul>
-        </article>
-        <article className="score-card">
-          <span>SAVAGE SCORE</span>
-          <strong>
-            {profile.xp.toLocaleString()} <small>XP</small>
-          </strong>
-          <div className="rank-line">
-            <i />
-            <b />
-          </div>
-          <p>
-            OUTSIDER <em>REBEL</em> BEAST SAVAGE ALPHA
-          </p>
-        </article>
-        <article className="position-card">
-          <span>YOUR POSITION</span>
-          <strong>#{String(profile.position).padStart(4, "0")}</strong>
-          <p>
-            MINT STATUS <b>LOCKED</b>
-          </p>
-        </article>
-        <article className="referral-card">
-          <span>BRING THE PACK</span>
-          <h2>{profile.recruits} SAVAGES RECRUITED</h2>
-          <div>
-            <code>{referral}</code>
-            <button onClick={() => navigator.clipboard?.writeText(referral)}>
-              COPY
-            </button>
-          </div>
-          <p>Each verified recruit adds +250 Savage XP.</p>
-        </article>
-      </div>
-      <div className="locked-reveal">
-        <span>COLLECTION STATUS</span>
-        <strong>REVEAL INCOMING...</strong>
-        <div />
-      </div>
-    </section>
   );
 }
