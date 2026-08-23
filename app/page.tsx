@@ -43,6 +43,7 @@ export default function Home() {
   const [username, setUsername] = useState("");
   const [wallet, setWallet] = useState("");
   const [done, setDone] = useState<boolean[]>([false, false, false]);
+  const [commentProof, setCommentProof] = useState("");
   const [profile, setProfile] = useState<Savage | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,21 +92,38 @@ export default function Home() {
           ? 3
           : 0;
   const walletValid = /^0x[a-fA-F0-9]{40}$/.test(wallet);
-  const allDone = done.every(Boolean);
+  const commentProofValid =
+    /^https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/[A-Za-z0-9_]+\/status\/\d+(?:[/?#].*)?$/i.test(
+      commentProof.trim(),
+    );
+  const missionComplete = (index: number) =>
+    index === 2 ? commentProofValid : done[index];
+  const completedCount = [0, 1, 2].filter(missionComplete).length;
+  const allDone = completedCount === 3;
   const openMission = (index: number, href: string) => {
     window.open(href, "_blank", "noopener,noreferrer");
-    setDone((current) =>
-      current.map((value, i) => (i === index ? true : value)),
-    );
+    if (index !== 2) {
+      setDone((current) =>
+        current.map((value, i) => (i === index ? true : value)),
+      );
+    }
   };
   const join = async () => {
+    if (!allDone) {
+      setError("Complete every mission and submit proof of your mark.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
       const response = await fetch(`${API_BASE}/api/whitelist`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ username, wallet, missions: done }),
+        body: JSON.stringify({
+          username,
+          wallet,
+          missions: [done[0], done[1], commentProofValid],
+        }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Registration failed");
@@ -250,7 +268,7 @@ export default function Home() {
             <div className="mission-grid">
               {missions.map((m, i) => (
                 <article
-                  className={done[i] ? "mission done" : "mission"}
+                  className={missionComplete(i) ? "mission done" : "mission"}
                   key={m.n}
                   style={{
                     display: "flex",
@@ -258,13 +276,15 @@ export default function Home() {
                     boxSizing: "border-box",
                     width: "100%",
                     minWidth: 0,
-                    minHeight: 330,
+                    minHeight: i === 2 ? 500 : 330,
                     height: "auto",
                     overflow: "hidden",
                   }}
                 >
                   <span>MISSION / {m.n}</span>
-                  <div className="mission-mark">{done[i] ? "✓" : m.n}</div>
+                  <div className="mission-mark">
+                    {missionComplete(i) ? "✓" : m.n}
+                  </div>
                   <h2 style={{ position: "static", margin: "82px 0 14px" }}>
                     {m.title}
                   </h2>
@@ -291,8 +311,81 @@ export default function Home() {
                     }}
                     onClick={() => openMission(i, m.href)}
                   >
-                    {done[i] ? "COMPLETED" : m.action}
+                    {i !== 2 && done[i] ? "COMPLETED" : m.action}
                   </button>
+                  {i === 2 && (
+                    <div
+                      style={{
+                        boxSizing: "border-box",
+                        width: "100%",
+                        marginTop: 20,
+                        paddingTop: 20,
+                        borderTop: "1px solid #303030",
+                      }}
+                    >
+                      <label
+                        htmlFor="comment-proof"
+                        style={{
+                          display: "block",
+                          marginBottom: 10,
+                          color: commentProofValid ? "#b6ff3b" : "#bdbdb7",
+                          fontSize: 8,
+                          fontWeight: 900,
+                          letterSpacing: ".18em",
+                        }}
+                      >
+                        PROOF OF YOUR MARK
+                      </label>
+                      <input
+                        id="comment-proof"
+                        type="url"
+                        inputMode="url"
+                        autoComplete="off"
+                        value={commentProof}
+                        onChange={(event) => setCommentProof(event.target.value)}
+                        placeholder="DROP THE LINK TO YOUR MARK"
+                        aria-invalid={commentProof.length > 0 && !commentProofValid}
+                        required
+                        style={{
+                          boxSizing: "border-box",
+                          display: "block",
+                          width: "100%",
+                          minWidth: 0,
+                          minHeight: 50,
+                          padding: "14px 12px",
+                          border: `1px solid ${
+                            commentProofValid ? "#4b7326" : "#383838"
+                          }`,
+                          borderRadius: 0,
+                          outline: "none",
+                          background: "rgba(0,0,0,.28)",
+                          color: "#fff",
+                          fontSize: 16,
+                          fontFamily: "inherit",
+                        }}
+                      />
+                      <small
+                        style={{
+                          display: "block",
+                          marginTop: 10,
+                          color: commentProofValid
+                            ? "#b6ff3b"
+                            : commentProof
+                              ? "#ff6b76"
+                              : "#777",
+                          fontSize: 7,
+                          lineHeight: 1.5,
+                          letterSpacing: ".14em",
+                        }}
+                      >
+                        {commentProofValid
+                          ? "MARK VERIFIED ✓"
+                          : commentProof
+                            ? "ENTER A VALID X COMMENT LINK"
+                            : "YOUR MARK ISN’T COMPLETE UNTIL THE PROOF IS SUBMITTED"}
+                      </small>
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
@@ -302,12 +395,12 @@ export default function Home() {
                 <div className="completion-bar">
                   <i
                     style={{
-                      width: `${(done.filter(Boolean).length / 3) * 100}%`,
+                      width: `${(completedCount / 3) * 100}%`,
                     }}
                   />
                 </div>
                 <strong>
-                  {Math.round((done.filter(Boolean).length / 3) * 100)}%
+                  {Math.round((completedCount / 3) * 100)}%
                 </strong>
               </div>
               <button
