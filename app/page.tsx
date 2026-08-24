@@ -28,14 +28,14 @@ const missions = [
     title: "SHOW SUPPORT",
     copy: "Like and repost the pinned Savage post.",
     action: "VIEW PINNED POST",
-    href: "https://x.com/thesavagesnft/status/2091192031074771104",
+    href: "https://x.com/thesavagesnft/status/2091799384019153352",
   },
   {
     n: "03",
     title: "LEAVE YOUR MARK",
     copy: "Comment and tell us why you belong in Savage.",
     action: "COMMENT",
-    href: "https://x.com/thesavagesnft/status/2091192031074771104",
+    href: "https://x.com/thesavagesnft/status/2091799384019153352",
   },
 ];
 export default function Home() {
